@@ -63,19 +63,19 @@ Why not X?
 
 ## Payload format
 
-Here's an example of a collection that contains a string, an integer, a byte vector, and a nested message.
-
-Sample data:
+Here's a sample payload that contains a string, an integer, a byte vector, and a nested message.
+Each value that has dynamic length (e.g., strings, byte vectors, nested messages) is prefixed with its length.
 
 ```
 05 00 00 00 48 65 6C 6C 6F 2A 00 03 00 00 00 22 0D 25 12 00 00 00 06 00 00 00 4E 65 73 74 65 64 AB 5B FF FF FF FF FF FF
 ```
 
+
 ```python
 [
   0x05, 0x00, 0x00, 0x00,                           # String length (5)
   0x48, 0x65, 0x6C, 0x6C, 0x6F,                     # String ("Hello")
-  0x2A,                                             # 16-bit unsigned int (42)
+  0x2A, 0X00,                                       # 16-bit unsigned int (42)
   0x03, 0x00, 0x00, 0x00,                           # Byte vector length (3)
   0x22, 0x0D, 0x25,                                 # Byte vector ([34, 13, 37])
   0x12, 0x00, 0x00, 0x00,                           # Nested message length (18)
