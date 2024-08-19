@@ -144,7 +144,9 @@ go get github.com/and3rson/fastmsg/go
 Serialization:
 
 ```go
-import "github.com/and3rson/fastmsg/go"
+import (
+    fastmsg "github.com/and3rson/fastmsg/go"
+)
 
 msg := NewMessage()
 msg.AddString("Hello")
