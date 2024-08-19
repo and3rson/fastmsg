@@ -16,9 +16,7 @@
 void test_normal() {
     // Create a message
     MessagePtr msg = std::make_shared<Message>();
-    msg->add("Hello");
-    msg->add(static_cast<uint16_t>(42));
-    msg->add(std::vector<uint8_t>{34, 13, 37});
+    msg->add("Hello")->add(static_cast<uint16_t>(42))->add(std::vector<uint8_t>{34, 13, 37});
 
     MessagePtr msgNested = std::make_shared<Message>();
     msgNested->add("Nested");
@@ -28,7 +26,7 @@ void test_normal() {
     std::cout << msg->toString() << std::endl;
 
     // Serialize the message
-    std::vector<uint8_t> buffer = msg->getBuffer();
+    std::vector<uint8_t> buffer = msg->seal();
     ASSERT_EQ(buffer.size(), 40);
 
     // Deserialize the message

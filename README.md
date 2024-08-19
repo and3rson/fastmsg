@@ -105,11 +105,10 @@ msg->add(static_cast<uint16_t>(42));
 msg->add(std::vector<uint8_t>{34, 13, 37});
 
 MessagePtr msgNested = std::make_shared<Message>();
-msgNested->add("Nested");
-msgNested->add(static_cast<int64_t>(-42069));
+msgNested->add("Nested")->add(static_cast<int64_t>(-42069)); // Chaining is supported
 msg->add(msgNested);
 
-std::vector<uint8_t> buffer = msg->getBuffer();
+std::vector<uint8_t> buffer = msg->seal();
 
 // Send buffer over network, write to file, etc.
 }
@@ -151,11 +150,10 @@ msg.AddUInt16(42)
 msg.AddBytes([]byte{34, 13, 37})
 
 msgNested := NewMessage()
-msgNested.AddString("Nested")
-msgNested.AddInt64(-42069)
+msgNested.AddString("Nested").AddInt64(-42069) // Chaining is supported
 msg.AddMessage(msgNested)
 
-buffer := msg.Buffer
+buffer := msg.Seal()
 ```
 
 Deserialization:
@@ -192,11 +190,10 @@ msg.add_uint16(42)
 msg.add_bytes(bytes([34, 13, 37]))
 
 msg_nested = Message()
-msg_nested.add_string("Nested")
-msg_nested.add_int64(-42069)
+msg_nested.add_string("Nested").add_int64(-42069)  # Chaining is supported
 msg.add_message(msg_nested)
 
-buffer = msg.buffer
+buffer = msg.seal()
 ```
 
 Deserialization:

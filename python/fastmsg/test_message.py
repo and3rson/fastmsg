@@ -13,14 +13,12 @@ class TestMessage(unittest.TestCase):
         msg.add_bytes(bytes([34, 13, 37]))
 
         msg_nested = Message()
-        msg_nested.add_string("Nested")
-        msg_nested.add_int64(-42069)
+        msg_nested.add_string("Nested").add_int64(-42069)
         msg.add_message(msg_nested)
 
-        if len(msg.buffer) != 40:
-            self.fail(f"Expected length 40, got {len(msg.buffer)}")
-
-        buffer = copy(msg.buffer)
+        buffer = msg.seal()
+        if len(buffer) != 40:
+            self.fail(f"Expected length 40, got {buffer}")
 
         deserialized = Message(buffer)
 
@@ -59,7 +57,7 @@ class TestMessage(unittest.TestCase):
         msg.reset()
 
         b = msg.read_bytes()
-        if b != b'':
+        if b != b"":
             self.fail(f"Expected None, got {b}")
 
         msg.reset()
@@ -71,8 +69,9 @@ class TestMessage(unittest.TestCase):
         msg.reset()
 
         msg = msg.read_message()
-        if len(msg.buffer) != 0:
-            self.fail(f"Expected length 0, got {len(msg.buffer)}")
+        buffer = msg.seal()
+        if len(buffer) != 0:
+            self.fail(f"Expected length 0, got {len(buffer)}")
 
     def test_out_of_bounds(self):
         msg = Message(bytes([0x01]))
@@ -84,7 +83,7 @@ class TestMessage(unittest.TestCase):
         msg.reset()
 
         b = msg.read_bytes()
-        if b != b'':
+        if b != b"":
             self.fail(f"Expected None, got {b}")
 
         msg.reset()
@@ -96,8 +95,9 @@ class TestMessage(unittest.TestCase):
         msg.reset()
 
         msg = msg.read_message()
-        if len(msg.buffer) != 0:
-            self.fail(f"Expected length 0, got {len(msg.buffer)}")
+        buffer = msg.seal()
+        if len(buffer) != 0:
+            self.fail(f"Expected length 0, got {len(buffer)}")
 
 
 if __name__ == "__main__":

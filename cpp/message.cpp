@@ -1,36 +1,38 @@
 #include "message.h"
-#include <iostream>
 
 Message::Message() : index(0) {
-    // buffer.reserve(1024);
 }
 
-Message::Message(std::vector<uint8_t> sourceBuffer) : Message() {
+Message::Message(const std::vector<uint8_t>& sourceBuffer) : Message() {
     buffer = sourceBuffer;
 }
 
-void Message::clear() {
+Message* Message::clear() {
     buffer.clear();
     index = 0;
+    return this;
 }
 
-void Message::add(uint8_t byte) {
+Message* Message::add(uint8_t byte) {
     buffer.push_back(byte);
+    return this;
 }
 
-void Message::add(uint16_t word) {
+Message* Message::add(uint16_t word) {
     buffer.push_back((word >> 0) & 0xFF);
     buffer.push_back((word >> 8) & 0xFF);
+    return this;
 }
 
-void Message::add(uint32_t dword) {
+Message* Message::add(uint32_t dword) {
     buffer.push_back((dword >> 0) & 0xFF);
     buffer.push_back((dword >> 8) & 0xFF);
     buffer.push_back((dword >> 16) & 0xFF);
     buffer.push_back((dword >> 24) & 0xFF);
+    return this;
 }
 
-void Message::add(uint64_t qword) {
+Message* Message::add(uint64_t qword) {
     buffer.push_back((qword >> 0) & 0xFF);
     buffer.push_back((qword >> 8) & 0xFF);
     buffer.push_back((qword >> 16) & 0xFF);
@@ -39,36 +41,40 @@ void Message::add(uint64_t qword) {
     buffer.push_back((qword >> 40) & 0xFF);
     buffer.push_back((qword >> 48) & 0xFF);
     buffer.push_back((qword >> 56) & 0xFF);
+    return this;
 }
 
-void Message::add(int8_t byte) {
-    add(static_cast<uint8_t>(byte));
+Message* Message::add(int8_t byte) {
+    return add(static_cast<uint8_t>(byte));
 }
 
-void Message::add(int16_t word) {
-    add(static_cast<uint16_t>(word));
+Message* Message::add(int16_t word) {
+    return add(static_cast<uint16_t>(word));
 }
 
-void Message::add(int32_t dword) {
-    add(static_cast<uint32_t>(dword));
+Message* Message::add(int32_t dword) {
+    return add(static_cast<uint32_t>(dword));
 }
 
-void Message::add(int64_t qword) {
-    add(static_cast<uint64_t>(qword));
+Message* Message::add(int64_t qword) {
+    return add(static_cast<uint64_t>(qword));
 }
 
-void Message::add(std::string str) {
+Message* Message::add(std::string str) {
     add((uint32_t)str.length());
     buffer.insert(buffer.end(), str.begin(), str.end());
+    return this;
 }
 
-void Message::add(std::vector<uint8_t> bytes) {
+Message* Message::add(std::vector<uint8_t> bytes) {
     add((uint32_t)bytes.size());
     buffer.insert(buffer.end(), bytes.begin(), bytes.end());
+    return this;
 }
 
-void Message::add(MessagePtr message) {
-    add(message->getBuffer());
+Message* Message::add(MessagePtr message) {
+    add(message->seal());
+    return this;
 }
 
 void Message::reset() {
@@ -160,7 +166,7 @@ MessagePtr Message::readMessage() {
     return std::make_shared<Message>(bytes);
 }
 
-std::vector<uint8_t> Message::getBuffer() {
+const std::vector<uint8_t>& Message::seal() {
     return buffer;
 }
 

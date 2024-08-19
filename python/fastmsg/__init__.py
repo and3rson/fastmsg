@@ -6,16 +6,18 @@ class Message:
     def __init__(self, buffer: Optional[bytes] = None):
         if buffer is None:
             buffer = b""
-        self.buffer = buffer
+        self._buffer = buffer
         self.index = 0
 
     def clear(self):
-        self.buffer = b""
+        self._buffer = b""
+        return self
 
     @staticmethod
     def packer(fmt: str, doc: str):
         def pack(self, value):
-            self.buffer += struct.pack(fmt, value)
+            self._buffer += struct.pack(fmt, value)
+            return self
 
         pack.__doc__ = doc
         return pack
@@ -31,21 +33,25 @@ class Message:
 
     def add_string(self, value: str):
         self.add_uint32(len(value))
-        self.buffer += value.encode("utf-8")
+        self._buffer += value.encode("utf-8")
+        return self
 
     def add_bytes(self, value: bytes):
         self.add_uint32(len(value))
-        self.buffer += value
+        self._buffer += value
+        return self
 
-    def add_message(self, message: 'Message'):
-        self.add_uint32(len(message.buffer))
-        self.buffer += message.buffer
+    def add_message(self, message: "Message"):
+        buf = message.seal()
+        self.add_uint32(len(buf))
+        self._buffer += buf
+        return self
 
     def reset(self):
         self.index = 0
 
     def _has_remaining(self, size: int):
-        return self.index + size <= len(self.buffer)
+        return self.index + size <= len(self._buffer)
 
     @staticmethod
     def unpacker(fmt: str, doc: str):
@@ -53,7 +59,7 @@ class Message:
             size = struct.calcsize(fmt)
             if not self._has_remaining(size):
                 return 0
-            value = struct.unpack_from(fmt, self.buffer, self.index)[0]
+            value = struct.unpack_from(fmt, self._buffer, self.index)[0]
             self.index += size
             return value
 
@@ -73,7 +79,7 @@ class Message:
         size = self.read_uint32()
         if not self._has_remaining(size):
             return b""
-        value = self.buffer[self.index : self.index + size]
+        value = self._buffer[self.index : self.index + size]
         self.index += size
         return value
 
@@ -84,9 +90,12 @@ class Message:
         return Message(self.read_bytes())
 
     def __bytes__(self):
-        return self.buffer
+        return self._buffer
 
     def __repr__(self):
         return (
-            f'[{len(self.buffer)} bytes: {" ".join(f"{b:02X}" for b in self.buffer)}]'
+            f'[{len(self._buffer)} bytes: {" ".join(f"{b:02X}" for b in self._buffer)}]'
         )
+
+    def seal(self):
+        return self._buffer

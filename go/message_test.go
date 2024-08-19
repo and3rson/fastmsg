@@ -9,9 +9,7 @@ func TestNormal(t *testing.T) {
 	t.Log("TestNormal")
 
 	msg := NewMessage()
-	msg.AddString("Hello")
-	msg.AddUInt16(42)
-	msg.AddBytes([]byte{34, 13, 37})
+	msg.AddString("Hello").AddUInt16(42).AddBytes([]byte{34, 13, 37})
 
 	msgNested := NewMessage()
 	msgNested.AddString("Nested")
@@ -20,11 +18,10 @@ func TestNormal(t *testing.T) {
 
 	t.Logf("Serialized: %v", msg)
 
-	if len(msg.Buffer) != 40 {
-		t.Errorf("Expected length 40, got %d", len(msg.Buffer))
+	buffer := msg.Seal()
+	if len(buffer) != 40 {
+		t.Errorf("Expected length 40, got %d", len(buffer))
 	}
-
-	buffer := msg.Buffer
 
 	deserialized := NewMessageFromBuffer(buffer)
 	t.Logf("Deserialized: %v", deserialized)
@@ -88,8 +85,10 @@ func TestBrokenLength(t *testing.T) {
 	msg.Reset()
 
 	msg = msg.ReadMessage()
-	if len(msg.Buffer) != 0 {
-		t.Errorf("Expected length 0, got %d", len(msg.Buffer))
+
+	buffer := msg.Seal()
+	if len(buffer) != 0 {
+		t.Errorf("Expected length 0, got %d", len(buffer))
 	}
 }
 
@@ -120,7 +119,9 @@ func TestOutOfBounds(t *testing.T) {
 	msg.Reset()
 
 	msg = msg.ReadMessage()
-	if len(msg.Buffer) != 0 {
-		t.Errorf("Expected length 0, got %d", len(msg.Buffer))
+
+	buffer := msg.Seal()
+	if len(buffer) != 0 {
+		t.Errorf("Expected length 0, got %d", len(buffer))
 	}
 }
