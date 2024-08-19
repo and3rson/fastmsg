@@ -1,5 +1,5 @@
-// Go implementation of the fastmsg Message class
-package main
+// Package fastmsg provides Go implementation of the fastmsg Message class
+package fastmsg
 
 import "encoding/binary"
 

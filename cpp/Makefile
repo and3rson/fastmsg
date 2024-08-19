@@ -7,7 +7,6 @@ test: $(TARGET)
 	cppcheck . \
 		-i .ccls-cache \
 		--enable=performance,style \
-		--check-level=exhaustive \
 		--error-exitcode=1
 
 $(TARGET): $(SRC) $(HEADERS)

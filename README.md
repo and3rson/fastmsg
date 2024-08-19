@@ -2,6 +2,8 @@
 
 fastmsg is a set of cross-language serialization libraries.
 
+[![Tests](https://github.com/and3rson/fastmsg/actions/workflows/tests.yml/badge.svg)](https://github.com/and3rson/fastmsg/actions/workflows/tests.yml) [![Go Reference](https://pkg.go.dev/badge/github.com/and3rson/fastmsg/go.svg)](https://pkg.go.dev/github.com/and3rson/fastmsg/go)
+
 Currently, the following languages are supported:
 
 - [C++](./cpp)

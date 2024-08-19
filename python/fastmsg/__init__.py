@@ -13,8 +13,7 @@ class Message:
         self._buffer = b""
         return self
 
-    @staticmethod
-    def packer(fmt: str, doc: str):
+    def _packer(fmt: str, doc: str):
         def pack(self, value):
             self._buffer += struct.pack(fmt, value)
             return self
@@ -22,14 +21,14 @@ class Message:
         pack.__doc__ = doc
         return pack
 
-    add_uint8 = packer("B", "Add an unsigned 8-bit integer")
-    add_uint16 = packer("H", "Add an unsigned 16-bit integer")
-    add_uint32 = packer("I", "Add an unsigned 32-bit integer")
-    add_uint64 = packer("Q", "Add an unsigned 64-bit integer")
-    add_int8 = packer("b", "Add a signed 8-bit integer")
-    add_int16 = packer("h", "Add a signed 16-bit integer")
-    add_int32 = packer("i", "Add a signed 32-bit integer")
-    add_int64 = packer("q", "Add a signed 64-bit integer")
+    add_uint8 = _packer("B", "Add an unsigned 8-bit integer")
+    add_uint16 = _packer("H", "Add an unsigned 16-bit integer")
+    add_uint32 = _packer("I", "Add an unsigned 32-bit integer")
+    add_uint64 = _packer("Q", "Add an unsigned 64-bit integer")
+    add_int8 = _packer("b", "Add a signed 8-bit integer")
+    add_int16 = _packer("h", "Add a signed 16-bit integer")
+    add_int32 = _packer("i", "Add a signed 32-bit integer")
+    add_int64 = _packer("q", "Add a signed 64-bit integer")
 
     def add_string(self, value: str):
         self.add_uint32(len(value))
@@ -53,8 +52,7 @@ class Message:
     def _has_remaining(self, size: int):
         return self.index + size <= len(self._buffer)
 
-    @staticmethod
-    def unpacker(fmt: str, doc: str):
+    def _unpacker(fmt: str, doc: str):
         def unpack(self):
             size = struct.calcsize(fmt)
             if not self._has_remaining(size):
@@ -66,14 +64,14 @@ class Message:
         unpack.__doc__ = doc
         return unpack
 
-    read_uint8 = unpacker("B", "Read an unsigned 8-bit integer")
-    read_uint16 = unpacker("H", "Read an unsigned 16-bit integer")
-    read_uint32 = unpacker("I", "Read an unsigned 32-bit integer")
-    read_uint64 = unpacker("Q", "Read an unsigned 64-bit integer")
-    read_int8 = unpacker("b", "Read a signed 8-bit integer")
-    read_int16 = unpacker("h", "Read a signed 16-bit integer")
-    read_int32 = unpacker("i", "Read a signed 32-bit integer")
-    read_int64 = unpacker("q", "Read a signed 64-bit integer")
+    read_uint8 = _unpacker("B", "Read an unsigned 8-bit integer")
+    read_uint16 = _unpacker("H", "Read an unsigned 16-bit integer")
+    read_uint32 = _unpacker("I", "Read an unsigned 32-bit integer")
+    read_uint64 = _unpacker("Q", "Read an unsigned 64-bit integer")
+    read_int8 = _unpacker("b", "Read a signed 8-bit integer")
+    read_int16 = _unpacker("h", "Read a signed 16-bit integer")
+    read_int32 = _unpacker("i", "Read a signed 32-bit integer")
+    read_int64 = _unpacker("q", "Read a signed 64-bit integer")
 
     def read_bytes(self):
         size = self.read_uint32()
