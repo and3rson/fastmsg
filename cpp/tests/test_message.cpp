@@ -39,6 +39,12 @@ void test_normal() {
     MessagePtr deserializedNested = deserialized->readMessage();
     ASSERT_EQ(deserializedNested->readString(), "Nested");
     ASSERT_EQ(deserializedNested->readInt64(), -42069);
+
+    msg->clear();
+    msg->add("Привіт");
+    std::cout << msg->toString();
+    msg->reset();
+    ASSERT_EQ(msg->readString(), "Привіт");
 }
 
 void test_broken_length() {

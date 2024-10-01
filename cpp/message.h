@@ -24,7 +24,8 @@ public:
     Message* add(int16_t word);
     Message* add(int32_t dword);
     Message* add(int64_t qword);
-    Message* add(std::string str);
+    Message* add(const std::string& str);
+    Message* add(const std::wstring& str);
     Message* add(std::vector<uint8_t> bytes);
     Message* add(MessagePtr message);
 
@@ -39,8 +40,14 @@ public:
     int32_t readInt32();
     int64_t readInt64();
     std::string readString();
+    std::wstring readWString();
     std::vector<uint8_t> readBytes();
     MessagePtr readMessage();
+
+    template <typename T>
+    T readUInt8() {
+        return reinterpret_cast<T>(readUInt8());
+    }
 
     const std::vector<uint8_t>& seal();
     size_t size() const;

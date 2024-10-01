@@ -1,4 +1,5 @@
 #include "message.h"
+#include <vector>
 
 Message::Message() : index(0) {
 }
@@ -60,9 +61,42 @@ Message* Message::add(int64_t qword) {
     return add(static_cast<uint64_t>(qword));
 }
 
-Message* Message::add(std::string str) {
+Message* Message::add(const std::string& str) {
     add((uint32_t)str.length());
     buffer.insert(buffer.end(), str.begin(), str.end());
+    return this;
+}
+
+// Helper function to encode a single wide character to UTF-8
+void encodeUtf8Char(std::vector<uint8_t>& byteArray, wchar_t wc16) {
+    uint32_t wc = static_cast<uint32_t>(wc16);
+    if (wc <= 0x7F) {
+        // 1-byte character (ASCII)
+        byteArray.push_back(static_cast<uint8_t>(wc));
+    } else if (wc <= 0x7FF) {
+        // 2-byte character
+        byteArray.push_back(static_cast<uint8_t>(0xC0 | (wc >> 6)));
+        byteArray.push_back(static_cast<uint8_t>(0x80 | (wc & 0x3F)));
+    } else if (wc <= 0xFFFF) {
+        // 3-byte character
+        byteArray.push_back(static_cast<uint8_t>(0xE0 | (wc >> 12)));
+        byteArray.push_back(static_cast<uint8_t>(0x80 | ((wc >> 6) & 0x3F)));
+        byteArray.push_back(static_cast<uint8_t>(0x80 | (wc & 0x3F)));
+    } else if (wc <= 0x10FFFF) {
+        // 4-byte character
+        byteArray.push_back(static_cast<uint8_t>(0xF0 | (wc >> 18)));
+        byteArray.push_back(static_cast<uint8_t>(0x80 | ((wc >> 12) & 0x3F)));
+        byteArray.push_back(static_cast<uint8_t>(0x80 | ((wc >> 6) & 0x3F)));
+        byteArray.push_back(static_cast<uint8_t>(0x80 | (wc & 0x3F)));
+    }
+}
+
+Message* Message::add(const std::wstring& str) {
+    std::vector<uint8_t> bytes;
+    for (wchar_t c : str) {
+        encodeUtf8Char(bytes, c);
+    }
+    add(bytes);
     return this;
 }
 
@@ -158,6 +192,55 @@ std::vector<uint8_t> Message::readBytes() {
 std::string Message::readString() {
     std::vector<uint8_t> bytes = readBytes();
     std::string str(bytes.begin(), bytes.end());
+    return str;
+}
+
+wchar_t decodeUtf8Char(const std::vector<uint8_t>& utf8Bytes, size_t& index) {
+    uint8_t byte = utf8Bytes[index];
+    wchar_t wc = 0;
+
+    if (byte <= 0x7F) {
+        // 1-byte character (ASCII)
+        wc = byte;
+    } else if ((byte & 0xE0) == 0xC0) {
+        // 2-byte character
+        if (index + 1 >= utf8Bytes.size()) {
+            return 0;
+        };
+        wc = ((byte & 0x1F) << 6) | (utf8Bytes[++index] & 0x3F);
+    } else if ((byte & 0xF0) == 0xE0) {
+        // 3-byte character
+        if (index + 2 >= utf8Bytes.size()) {
+            return 0;
+        }
+        wc = ((byte & 0x0F) << 12) | ((utf8Bytes[index + 1] & 0x3F) << 6) | (utf8Bytes[index + 2] & 0x3F);
+        index += 2;
+    } else if ((byte & 0xF8) == 0xF0) {
+        // 4-byte character
+        if (index + 3 >= utf8Bytes.size()) {
+            return 0;
+        }
+        wc = ((byte & 0x07) << 18) | ((utf8Bytes[index + 1] & 0x3F) << 12) | ((utf8Bytes[index + 2] & 0x3F) << 6) |
+             (utf8Bytes[index + 3] & 0x3F);
+        index += 3;
+    } else {
+        return 0;
+    }
+
+    return wc;
+}
+
+std::wstring Message::readWString() {
+    std::wstring str;
+    std::vector<uint8_t> bytes = readBytes();
+    size_t i = 0;
+    while (i < bytes.size()) {
+        wchar_t c = decodeUtf8Char(bytes, index);
+        if (c) {
+            str.push_back(c);
+        }
+        i++;
+    }
     return str;
 }
 
